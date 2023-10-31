@@ -1,78 +1,74 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
+import { api } from "../services/api";
 
-import { api } from "../services/api"
-
-export const AuthContext = createContext({})
+const AuthContext = createContext({});
 
 function AuthProvider({ children }) {
-    const [data, setData] = useState({})
-    const [meals, setMeals] = useState([])
+    const [data, setData] = useState({});
+    const [meals, setMeals] = useState([]);
 
-    async function signIn({ email, password }) {
+    const setTokenHeader = (token) => {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    };
+
+    const signIn = async ({ email, password }) => {
         try {
-            const response = await api.post("/sessions", { email, password })
-            const { user, token } = response.data
+            const response = await api.post("/sessions", { email, password });
+            const { user, token } = response.data;
 
-            localStorage.setItem("@foodexplorer:user", JSON.stringify(user))
-            localStorage.setItem("@foodexplorer:token", token)
+            localStorage.setItem("@foodexplorer:user", JSON.stringify(user));
+            localStorage.setItem("@foodexplorer:token", token);
 
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`  // aplica o token para todas no cabeçalho de todas requisições desse user
-            setData({ user, token }) // armazena no estado
+            setTokenHeader(token);
+            setData({ user, token });
 
-        } catch(error) {
-            if(error.response) {
-                alert(error.response.data.message)
-            }
-            else {
-                alert("Não foi possível entrar.")
-            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
-    async function signOut() {
-        localStorage.removeItem("@foodexplorer:token")
-        localStorage.removeItem("@foodexplorer:user")
+    const signOut = () => {
+        localStorage.removeItem("@foodexplorer:token");
+        localStorage.removeItem("@foodexplorer:user");
+        setTokenHeader(null);
 
-        setData({}) // para levar pro auth routes
+        setData({});
     }
 
-    async function searchForMeal(search) {
-        const response = await api.get(`/meals?name=${search}`)
-
-        setMeals(response.data)
+    const searchForMeal = async (search) => {
+        const response = await api.get(`/meals?name=${search}`);
+        setMeals(response.data);
     }
 
     useEffect(() => {
-        const token = localStorage.getItem("@foodexplorer:token")
-        const user = localStorage.getItem("@foodexplorer:user")
+        const token = localStorage.getItem("@foodexplorer:token");
+        const user = localStorage.getItem("@foodexplorer:user");
 
         if (token && user) {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}` //aplica o token para todas as req
-
+            setTokenHeader(token);
             setData({
                 token,
-                user: JSON.parse(user)
-            })
+                user: JSON.parse(user),
+            });
         }
-    }, [])
+    }, []);
 
-    return(
+    return (
         <AuthContext.Provider value={{
             signIn,
             signOut,
             user: data.user,
             meals,
-            searchForMeal
+            searchForMeal,
         }}>
             {children}
         </AuthContext.Provider>
-    )
+    );
 }
 
 function useAuth() {
-    const context = useContext(AuthContext)
-
-    return context
+    const context = useContext(AuthContext);
+    return context;
 }
 
-export { AuthProvider, useAuth }
+export { AuthProvider, useAuth };

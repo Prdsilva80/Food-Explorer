@@ -1,36 +1,27 @@
+import React, { useState, useRef } from "react";
+import { api } from "../../../services/api";
+import { useNavigate } from "react-router-dom";
+import PropagateLoader from "react-spinners/PropagateLoader";
+import { FiUpload } from "react-icons/fi";
 import { Container, Form } from "./styles";
-
 import { GoBack } from "../../../components/GoBack";
 import { AdminHeader } from "../../../components/AdminHeader";
-import { Footer } from "../../../components/footer";
+import { Footer } from "../../../components/Footer";
 import { AddIngredients } from "../../../components/AddIngredients";
 import { AdminMenu } from "../menu";
 
-import { FiUpload } from "react-icons/fi"
-
-import { useState, useRef } from "react";
-import { api } from "../../../services/api";
-import { useNavigate } from "react-router-dom";
-
-import PropagateLoader from "react-spinners/PropagateLoader";
-
 export function AddMeal() {
     const navigate = useNavigate()
-
-    const [ loading, setLoading] = useState(false)
-
     const menuPage = useRef(null)
-
-    const [ name, setName ] = useState("")
-    const [ description, setDescription ] = useState("")
-    const [ price, setPrice ] = useState("")
-    const [ category, setCategory ] = useState("Refeição")
-
-    const [ingredients, setIngredients] = useState([]) // array de ing
-    const [newIngredient, setNewIngredient] = useState("") // o nome do novo ing
-
-    const [avatarFile, setAvatarFile] = useState(null)
-
+    const [loading, setLoading] = useState(false);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [price, setPrice] = useState("");
+    const [category, setCategory] = useState("Refeição");
+    const [ingredients, setIngredients] = useState([]);
+    const [newIngredient, setNewIngredient] = useState("");
+    const [avatarFile, setAvatarFile] = useState(null);
+    
     function handleAddIngredients() {
         if (newIngredient) {
             setIngredients(prev => [...prev, newIngredient])
@@ -97,11 +88,11 @@ export function AddMeal() {
         navigate("/")
     }
 
-    function openMenu() {
-        menuPage.current.id="visible"
+    const openMenu = () => {
+        menuPage.current.id = "visible"
     }
 
-    function closeMenu() {
+    const closeMenu = () => {
         menuPage.current.id="not-visible"
     }
 
